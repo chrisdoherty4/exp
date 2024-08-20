@@ -1,0 +1,6 @@
+releases:
+- name: foo
+  chart: foo
+  version: 0.0.0
+  values:
+  - values.yml
