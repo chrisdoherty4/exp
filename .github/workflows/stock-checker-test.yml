@@ -1,0 +1,30 @@
+name: stock-checker-test
+
+on:
+  push:
+    branches: [main]
+    paths: [stock-checker/**]
+  pull_request:
+    branches: [main]
+    paths: [stock-checker/**]
+
+defaults:
+  run:
+    working-directory: stock-checker
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: pip install -e ".[test]"
+
+      - run: pytest -v

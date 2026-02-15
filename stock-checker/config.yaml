@@ -1,0 +1,20 @@
+products:
+  - name: "Kendamil Goat Infant Powder Formula"
+    stores:
+      - type: target
+        tcin: "88379079"
+        store_id: "1113"       # Coralville, IA
+        zip: "52241"
+
+polling:
+  base_interval_seconds: 900   # 15 minutes
+  jitter_factor: 0.5           # ±50% → checks every 7.5–22.5 min
+
+notifications:
+  - type: log                  # stdout — always enabled
+  # - type: email              # future
+  #   recipients:
+  #     - you@example.com
+
+# proxy:
+#   url: "http://user:pass@gate.smartproxy.com:7777"
