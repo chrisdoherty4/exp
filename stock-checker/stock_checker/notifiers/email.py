@@ -22,7 +22,7 @@ class EmailNotifier:
         self,
         product_key: str,
         product_name: str,
-        _: StockStatus,
+        previous: StockStatus,
         current: StockStatus,
     ) -> None:
         msg = EmailMessage()
@@ -30,7 +30,7 @@ class EmailNotifier:
         msg["From"] = self.from_addr
         msg["To"] = ", ".join(self.recipients)
         msg.set_content(
-            f"{product_name} [{product_key}] is now {current.value}."
+            f"{product_name} [{product_key}] is now {current.value} (was {previous.value})."
         )
 
         logger.info("Sending restock email for %s to %s", product_key, self.recipients)

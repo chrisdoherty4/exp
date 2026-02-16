@@ -11,9 +11,40 @@ logger = logging.getLogger(__name__)
 @dataclass
 class StoreConfig:
     type: str
-    tcin: str = ""
     store_id: str = ""
+
+    @property
+    def product_id(self) -> str:
+        raise NotImplementedError
+
+
+@dataclass
+class TargetStoreConfig(StoreConfig):
+    tcin: str = ""
     zip: str = ""
+
+    @property
+    def product_id(self) -> str:
+        return self.tcin
+
+
+@dataclass
+class WalmartStoreConfig(StoreConfig):
+    item_id: str = ""
+    store_name: str = ""
+
+    @property
+    def product_id(self) -> str:
+        return self.item_id
+
+
+def create_store_config(data: dict) -> StoreConfig:
+    store_type = data.get("type", "")
+    if store_type == "target":
+        return TargetStoreConfig(**data)
+    if store_type == "walmart":
+        return WalmartStoreConfig(**data)
+    raise ValueError(f"Unknown store type: {store_type}")
 
 
 @dataclass
@@ -35,6 +66,13 @@ class NotificationConfig:
 
 
 @dataclass
+class StatusPageConfig:
+    enabled: bool = False
+    host: str = "127.0.0.1"
+    port: int = 8080
+
+
+@dataclass
 class Config:
     products: list[ProductConfig] = field(default_factory=list)
     polling: PollingConfig = field(default_factory=PollingConfig)
@@ -43,6 +81,7 @@ class Config:
     log_level: str = "INFO"
     once: bool = False
     proxy_url: str | None = None
+    status_page: StatusPageConfig = field(default_factory=StatusPageConfig)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -102,7 +141,7 @@ def load_config(argv: list[str] | None = None) -> Config:
     # Build products
     products: list[ProductConfig] = []
     for p in yaml_data.get("products", []):
-        stores = [StoreConfig(**s) for s in p.get("stores", [])]
+        stores = [create_store_config(s) for s in p.get("stores", [])]
         products.append(ProductConfig(name=p["name"], stores=stores))
 
     # Build polling config (YAML defaults, CLI overrides)
@@ -137,6 +176,14 @@ def load_config(argv: list[str] | None = None) -> Config:
     proxy_data = yaml_data.get("proxy", {})
     proxy_url = proxy_data.get("url") if proxy_data else None
 
+    # Status page config
+    sp_data = yaml_data.get("status_page", {})
+    status_page = StatusPageConfig(
+        enabled=sp_data.get("enabled", False),
+        host=sp_data.get("host", "127.0.0.1"),
+        port=sp_data.get("port", 8080),
+    ) if sp_data else StatusPageConfig()
+
     return Config(
         products=products,
         polling=polling,
@@ -145,4 +192,5 @@ def load_config(argv: list[str] | None = None) -> Config:
         log_level=log_level,
         once=args.once,
         proxy_url=proxy_url,
+        status_page=status_page,
     )

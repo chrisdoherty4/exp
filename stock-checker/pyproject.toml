@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "Product availability monitor for retail stores"
 requires-python = ">=3.11"
 dependencies = [
-    "httpx",
+    "aiohttp",
+    "curl-cffi",
     "pyyaml",
 ]
 
@@ -12,7 +13,6 @@ dependencies = [
 test = [
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
-    "respx>=0.22",
 ]
 
 [tool.pytest.ini_options]
